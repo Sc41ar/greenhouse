@@ -26,7 +26,7 @@ public class PromptService {
     private final String SYSTEM_PROMPT = """
             The user will provide question about gardening specific cultures in vertical greenhouse for commercial purposes and maximum output.\s
             Write Article in Russian about the plant and provide information about the following:
-            Such as recommended humidity percentage, temperature, watering frequency per day and watering schedule in 24 hours format, soil type, light exposure, and fertilization schedule.\s 
+            Such as recommended humidity percentage, temperature in degrees Celsius, watering frequency per day and watering schedule in 24 hours format, soil type, light exposure, and fertilization schedule.\s 
             And output them in JSON format.\s
                         
             EXAMPLE INPUT:\s
@@ -75,4 +75,6 @@ public class PromptService {
 
         return modelResponse;
     }
+
+
 }
