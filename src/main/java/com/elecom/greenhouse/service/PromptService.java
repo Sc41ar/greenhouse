@@ -97,8 +97,8 @@ public class PromptService {
         CultureData data = new CultureData();
         data.setHumidityShare(modelResponse.getHumidityShare());
         data.setTemperature(modelResponse.getTemperature());
-        data.setLightExposurePauseSeconds(modelResponse.getLightExposurePause());
-        data.setLightExposureSeconds(modelResponse.getLightExposure());
+        data.setLightExposurePauseSeconds(modelResponse.getLightExposurePause() / 1000); //TODO
+        data.setLightExposureSeconds(modelResponse.getLightExposure() / 1000); //TODO
         data.setPlantName(modelResponse.getPlantName());
         data.setFertilizationSchedule(modelResponse.getFertilizationSchedule());
         data.setSoilType(modelResponse.getSoilType());
