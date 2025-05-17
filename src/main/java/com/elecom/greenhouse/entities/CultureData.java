@@ -51,4 +51,10 @@ public class CultureData {
     @Column(name = "light_exposure_pause_seconds")
     private Integer lightExposurePauseSeconds;
 
+    @Column(name = "watering_seconds")
+    private Integer wateringSeconds;
+
+    @Column(name = "watering_pause_seconds")
+    private Integer wateringPauseSeconds;
+
 }

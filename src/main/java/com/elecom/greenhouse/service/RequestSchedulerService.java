@@ -69,6 +69,8 @@ public class RequestSchedulerService {
                                                            "",
                                                            0,
                                                            "",
+                                                           0,
+                                                           0,
                                                            0));
         return culture.getLightExposurePauseSeconds();
     }
@@ -94,6 +96,8 @@ public class RequestSchedulerService {
                                                            "",
                                                            0,
                                                            "",
+                                                           0,
+                                                           0,
                                                            0));
         return culture.getLightExposureSeconds();
     }

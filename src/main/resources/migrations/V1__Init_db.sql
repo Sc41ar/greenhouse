@@ -8,14 +8,17 @@ CREATE TABLE greenhouse_params
 
 CREATE TABLE culture_data
 (
-    id                       BIGINT NOT NULL,
-    plant_name               VARCHAR,
-    humidity_share           DOUBLE PRECISION,
-    temperature              DOUBLE PRECISION,
-    watering_daily_frequency DOUBLE PRECISION,
-    soil_type                VARCHAR,
-    light_exposure_hours     INTEGER,
-    fertilization_schedule   VARCHAR,
+    id                           BIGINT NOT NULL,
+    plant_name                   VARCHAR,
+    humidity_share               DOUBLE PRECISION,
+    temperature                  DOUBLE PRECISION,
+    watering_daily_frequency     DOUBLE PRECISION,
+    soil_type                    VARCHAR,
+    light_exposure_seconds       INTEGER,
+    fertilization_schedule       VARCHAR,
+    light_exposure_pause_seconds INTEGER,
+    watering_seconds             INTEGER,
+    watering_pause_seconds       INTEGER,
     CONSTRAINT pk_culturedata PRIMARY KEY (id)
 );
 
@@ -29,3 +32,4 @@ CREATE TABLE schedule
 
 ALTER TABLE schedule
     ADD CONSTRAINT FK_SCHEDULE_ON_CULTURE_DATA FOREIGN KEY (culture_data_id) REFERENCES culture_data (id);
+
