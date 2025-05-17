@@ -1,6 +1,7 @@
 package com.elecom.greenhouse.util;
 
 import com.elecom.greenhouse.entities.CultureData;
+import com.elecom.greenhouse.entities.SensorsData;
 import com.elecom.greenhouse.model.dto.ChatCompletionResponse;
 import com.elecom.greenhouse.model.dto.ModelResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,8 +1,11 @@
 package com.elecom.greenhouse.service;
 
 import com.elecom.greenhouse.entities.CultureData;
+import com.elecom.greenhouse.entities.SensorsData;
 import com.elecom.greenhouse.repositories.CultureDataRepository;
+import com.elecom.greenhouse.repositories.SensorsDataRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
@@ -17,24 +20,29 @@ import java.util.concurrent.ScheduledFuture;
 @Slf4j
 public class RequestSchedulerService {
 
+    private final SensorsDataRepository sensorsDataRepository;
+
     private final Map<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
     private final ThreadPoolTaskScheduler scheduler;
     private final CultureDataRepository cultureDataRepository;
-
     private final RestTemplate template = new RestTemplate();
+    @Value("${sensors.controller.url}")
+    private String sensorsControllerUrl;
 
     public RequestSchedulerService(ThreadPoolTaskScheduler scheduler,
-                                   CultureDataRepository cultureDataRepository) {
+                                   CultureDataRepository cultureDataRepository,
+                                   SensorsDataRepository sensorsDataRepository) {
         this.scheduler = scheduler;
         this.cultureDataRepository = cultureDataRepository;
+        this.sensorsDataRepository = sensorsDataRepository;
     }
 
     // Метод для планирования первого запроса
-    public void scheduleFirstRequest(Long entityId, Instant scheduleTime) {
+    public void scheduleLightFirstRequest(Long entityId, Instant scheduleTime) {
         log.info("Scheduling first request for entityId: {}", entityId);
         Runnable task = () -> {
             sendHttpRequest(entityId); // Отправка первого запроса
-            scheduleSecondRequest(entityId); // После отправки планируем второй запрос
+            scheduleLightSecondRequest(entityId); // После отправки планируем второй запрос
         };
 
         ScheduledFuture<?> future = scheduler.schedule(task,
@@ -43,13 +51,13 @@ public class RequestSchedulerService {
     }
 
     // Метод для планирования второго запроса
-    public void scheduleSecondRequest(Long entityId) {
+    private void scheduleLightSecondRequest(Long entityId) {
         log.info("Scheduling second request for entityId: {}", entityId);
         int workSeconds = getActiveSecondsFromDatabase(entityId);
         int pauseSeconds = getPauseSecondsFromDatabase(entityId);
         Runnable task = () -> {
-            sendSecondHttpRequest(entityId);
-            scheduleFirstRequest(entityId,
+            sendLightoffRequest(entityId);
+            scheduleLightFirstRequest(entityId,
                     Instant.now().plusSeconds(pauseSeconds));
         };
         ScheduledFuture<?> future = scheduler.schedule(task,
@@ -67,17 +75,17 @@ public class RequestSchedulerService {
     private void sendHttpRequest(Long entityId) {
         log.info("first request executed entityId: {}", entityId);
         try {
-            template.getForObject("http://192.168.31.147/light_off", String.class);
+            template.getForObject(sensorsControllerUrl + "/light_off", String.class);
         } catch (Exception e) {
             log.error("Error sending first request", e);
         }
-        ;
+
     }
 
-    private void sendSecondHttpRequest(Long entityId) {
+    private void sendLightoffRequest(Long entityId) {
         log.info("second request executed {}", entityId);
         try {
-            template.getForObject("http://192.168.31.147/light_off", String.class);
+            template.getForObject(sensorsControllerUrl + "/light_off", String.class);
         } catch (Exception e) {
             log.error("Error sending second request", e);
         }
@@ -90,7 +98,7 @@ public class RequestSchedulerService {
         return culture.getLightExposureSeconds();
     }
 
-//    @Scheduled(initialDelay = 10)
+    @Scheduled(initialDelay = 1000)
     public void checkLightning() {
         cultureDataRepository.findAll().forEach(cultureData -> {
             Instant currentTime = Instant.now();
@@ -98,8 +106,32 @@ public class RequestSchedulerService {
                     currentTime,
                     cultureData.getLightExposureSeconds(),
                     cultureData.getLightExposurePauseSeconds());
-            scheduleFirstRequest(cultureData.getId(), currentTime);
+            scheduleLightFirstRequest(cultureData.getId(), currentTime);
         });
+    }
+
+    @Scheduled(fixedRate = 5000)
+    public void collectSensorsData() {
+        String sensorsDataString = template.getForObject(sensorsControllerUrl + "/get_data",
+                String.class);
+
+        String[] sensorsDataSplit = sensorsDataString.split(";");
+        SensorsData sensorsData = null;
+        try {
+            sensorsData = new SensorsData();
+            sensorsData.setSoilMoisture(Double.parseDouble(sensorsDataSplit[0]));
+            sensorsData.setTemperature(Double.parseDouble(sensorsDataSplit[1]));
+            sensorsData.setHumidity(Double.parseDouble(sensorsDataSplit[2]));
+            sensorsData.setCo2(Double.parseDouble(sensorsDataSplit[3]));
+            sensorsData.setWaterTemperature(Double.parseDouble(sensorsDataSplit[4]));
+        } catch (Exception e) {
+            log.error("Error parsing sensor data", e);
+        } finally {
+            if (sensorsData != null) {
+                sensorsDataRepository.save(sensorsData);
+            }
+        }
+
     }
 
     public void resumeTasks(long entityId) {
@@ -109,7 +141,7 @@ public class RequestSchedulerService {
                     currentTime,
                     cultureData.getLightExposureSeconds(),
                     cultureData.getLightExposurePauseSeconds());
-            scheduleFirstRequest(cultureData.getId(), currentTime);
+            scheduleLightFirstRequest(cultureData.getId(), currentTime);
         });
     }
 

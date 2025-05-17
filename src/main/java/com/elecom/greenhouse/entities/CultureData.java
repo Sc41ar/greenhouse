@@ -1,5 +1,6 @@
 package com.elecom.greenhouse.entities;
 
+import com.elecom.greenhouse.service.CultureDataListener;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,10 +22,8 @@ public class CultureData {
     @Column(name = "id", nullable = false)
     private Long id;
 
-
     @Column(name = "plant_name")
     private String plantName;
-
 
     @Column(name = "humidity_share")
     private Double humidityShare;

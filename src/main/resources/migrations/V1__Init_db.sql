@@ -1,11 +1,14 @@
-CREATE TABLE greenhouse_params
+CREATE TABLE sensors_data
 (
-    id         BIGINT NOT NULL,
-    humidity_1 INTEGER,
-    humidity_2 INTEGER,
-    CONSTRAINT pk_greenhouseparams PRIMARY KEY (id)
+    id                BIGINT NOT NULL,
+    soil_moisture     DOUBLE PRECISION,
+    water_temperature DOUBLE PRECISION,
+    collected_at      TIMESTAMP with time zone,
+    temperature       DOUBLE PRECISION,
+    humidity          DOUBLE PRECISION,
+    co2               DOUBLE PRECISION,
+    CONSTRAINT pk_sensorsdata PRIMARY KEY (id)
 );
-
 CREATE TABLE culture_data
 (
     id                           BIGINT NOT NULL,
