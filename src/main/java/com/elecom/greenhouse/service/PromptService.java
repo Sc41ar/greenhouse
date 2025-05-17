@@ -30,7 +30,9 @@ public class PromptService {
              Such as recommended humidity percentage, soil moisture,
              temperature in degrees Celsius, watering frequency per day,\s
              soil type, light exposure in seconds,\s
-             light exposure pause in seconds.\s\s
+             light exposure pause in seconds,\s
+             watering in seconds,\s
+             watering pause in seconds.\s
              And output them in JSON format.\s
                         \s
              EXAMPLE INPUT:\s
@@ -46,6 +48,8 @@ public class PromptService {
                  "wateringFrequency": 1,
                  "lightExposure": 60000,
                  "lightExposurePause": 10000,
+                 "wateringSeconds": 10000,
+                 "wateringPause": 100000,
              }
             \s""";
     private final CultureDataRepository cultureDataRepository;
@@ -111,6 +115,9 @@ public class PromptService {
         data.setLightExposurePauseSeconds(modelResponse.getLightExposurePause() / 1000); //TODO
         data.setLightExposureSeconds(modelResponse.getLightExposure() / 1000); //TODO
         data.setPlantName(modelResponse.getPlantName());
+        data.setSoilMoisture(modelResponse.getSoilMoisture());
+        data.setWateringSeconds(modelResponse.getWateringSeconds() / 1000);
+        data.setWateringPauseSeconds(modelResponse.getWateringPause() / 1000);
 //        data.setFertilizationSchedule(modelResponse.getFertilizationSchedule());
         data.setSoilType(modelResponse.getSoilType());
 

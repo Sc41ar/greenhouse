@@ -1,12 +1,13 @@
 package com.elecom.greenhouse.entities;
 
-import com.elecom.greenhouse.service.CultureDataListener;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -59,4 +60,7 @@ public class CultureData {
     @Column(name = "watering_pause_seconds")
     private Integer wateringPauseSeconds;
 
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 }

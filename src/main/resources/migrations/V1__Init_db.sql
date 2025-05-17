@@ -22,6 +22,7 @@ CREATE TABLE culture_data
     light_exposure_pause_seconds INTEGER,
     watering_seconds             INTEGER,
     watering_pause_seconds       INTEGER,
+    updated_at                   TIMESTAMP with time zone,
     CONSTRAINT pk_culturedata PRIMARY KEY (id)
 );
 

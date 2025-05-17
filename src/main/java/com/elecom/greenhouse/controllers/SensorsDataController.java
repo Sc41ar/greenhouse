@@ -18,7 +18,8 @@ public class SensorsDataController {
 
     @GetMapping("/data")
     public SensorsData getSensorsData() {
-        return sensorsService.getLastSensorsData();
+        return new SensorsData();
+//                sensorsService.getLastSensorsData();
     }
 
 }

@@ -1,7 +1,6 @@
 package com.elecom.greenhouse.controllers;
 
 import com.elecom.greenhouse.service.RequestSchedulerService;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,17 +15,19 @@ public class ScheduleController {
         this.requestSchedulerService = requestSchedulerService;
     }
 
-    @PostMapping("/cancel/{plantId}")
+    @PostMapping("/cancel")
+//    @PostMapping("/cancel/{plantId}")
     public void cancelSchedule(
-            @PathVariable("plantId") Long plantId
+//            @PathVariable("plantId") Long plantId
     ) {
-        requestSchedulerService.cancelTasks(plantId);
+        requestSchedulerService.cancelTasks();
     }
 
-    @PostMapping("/resume/{plantId}")
+    @PostMapping("/resume")
+//    @PostMapping("/resume/{plantId}")
     public void resumeSchedule(
-            @PathVariable("plantId") Long plantId
+//            @PathVariable("plantId") Long plantId
     ) {
-        requestSchedulerService.resumeTasks(plantId);
+        requestSchedulerService.resumeTasks();
     }
 }

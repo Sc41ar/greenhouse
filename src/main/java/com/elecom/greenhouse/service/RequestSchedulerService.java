@@ -41,7 +41,7 @@ public class RequestSchedulerService {
     public void scheduleLightFirstRequest(Long entityId, Instant scheduleTime) {
         log.info("Scheduling first request for entityId: {}", entityId);
         Runnable task = () -> {
-            sendHttpRequest(entityId); // Отправка первого запроса
+            sendLightOnRequest(entityId); // Отправка первого запроса
             scheduleLightSecondRequest(entityId); // После отправки планируем второй запрос
         };
 
@@ -50,10 +50,34 @@ public class RequestSchedulerService {
         scheduledTasks.put(entityId, future);
     }
 
+    public void scheduleWaterRequest(Long entityId, Instant scheduleTime) {
+        log.info("Scheduling water request for entityId: {}", entityId);
+        Runnable task = () -> {
+            sendWaterOnRequest(entityId);
+            scheduleWaterSecondRequest(entityId);
+        };
+
+        ScheduledFuture<?> future = scheduler.schedule(task, scheduleTime);
+        scheduledTasks.put(entityId, future);
+    }
+
+    private void scheduleWaterSecondRequest(Long entityId) {
+        log.info("Scheduling second water request for entityId: {}", entityId);
+        int workSeconds = getWaterSeconds(entityId);
+        int pauseSeconds = getWaterPauseSeconds(entityId);
+        Runnable task = () -> {
+            sendWaterOffRequest(entityId);
+            scheduleWaterRequest(entityId, Instant.now().plusSeconds(pauseSeconds));
+        };
+
+        ScheduledFuture<?> future = scheduler.schedule(task, Instant.now().plusSeconds(workSeconds));
+        scheduledTasks.put(entityId, future);
+    }
+
     // Метод для планирования второго запроса
     private void scheduleLightSecondRequest(Long entityId) {
         log.info("Scheduling second request for entityId: {}", entityId);
-        int workSeconds = getActiveSecondsFromDatabase(entityId);
+        int workSeconds = getLightSeconds(entityId);
         int pauseSeconds = getPauseSecondsFromDatabase(entityId);
         Runnable task = () -> {
             sendLightoffRequest(entityId);
@@ -72,45 +96,78 @@ public class RequestSchedulerService {
     }
 
     // Методы для отправки HTTP-запросов
-    private void sendHttpRequest(Long entityId) {
+    private void sendLightOnRequest(Long entityId) {
         log.info("first request executed entityId: {}", entityId);
         try {
-            template.getForObject(sensorsControllerUrl + "/light_off", String.class);
+            template.getForObject(sensorsControllerUrl + "/light_on", String.class);
         } catch (Exception e) {
             log.error("Error sending first request", e);
         }
 
     }
 
+    private void sendWaterOnRequest(Long entityId) {
+        log.info("water request executed {}", entityId);
+        try {
+            template.getForObject(sensorsControllerUrl + "/water_on", String.class);
+        } catch (Exception e) {
+            log.error("Error sending water request", e);
+        }
+    }
+
     private void sendLightoffRequest(Long entityId) {
         log.info("second request executed {}", entityId);
         try {
             template.getForObject(sensorsControllerUrl + "/light_off", String.class);
+
         } catch (Exception e) {
             log.error("Error sending second request", e);
         }
     }
 
+    private void sendWaterOffRequest(Long entityId) {
+        log.info("water off request executed {}", entityId);
+        try {
+            template.getForObject(sensorsControllerUrl + "/water_off", String.class);
+        } catch (Exception e) {
+            log.error("Error sending water off request", e);
+        }
+    }
+
     // Метод для получения интервала из БД
-    private int getActiveSecondsFromDatabase(Long entityId) {
+    private int getLightSeconds(Long entityId) {
         CultureData culture = cultureDataRepository.findById(entityId)
                                                    .orElseGet(() -> new CultureData());
         return culture.getLightExposureSeconds();
     }
 
-//    @Scheduled(initialDelay = 1000)
+    private int getWaterSeconds(Long entityId) {
+        CultureData culture = cultureDataRepository.findById(entityId)
+                                                   .orElseGet(() -> new CultureData());
+        return culture.getWateringSeconds();
+    }
+
+    private int getWaterPauseSeconds(Long entityId) {
+        CultureData culture = cultureDataRepository.findById(entityId)
+                                                   .orElseGet(() -> new CultureData());
+        return culture.getWateringPauseSeconds();
+    }
+
+    @Scheduled(initialDelay = 1000)
     public void checkLightning() {
-        cultureDataRepository.findAll().forEach(cultureData -> {
+        cultureDataRepository.findFirstByOrderByUpdatedAtDesc().ifPresent(cultureData -> {
             Instant currentTime = Instant.now();
-            log.info("Current time: {}. Light exposure seconds: {}. Light exposure pause seconds: {}",
+            log.info(
+                    "Current time: {}. Light exposure seconds: {}. Light exposure pause seconds: {}",
                     currentTime,
                     cultureData.getLightExposureSeconds(),
                     cultureData.getLightExposurePauseSeconds());
+            scheduleWaterRequest(cultureData.getId(), currentTime);
             scheduleLightFirstRequest(cultureData.getId(), currentTime);
         });
     }
 
-//    @Scheduled(fixedRate = 5000)
+    //    @Scheduled(fixedRate = 5000)
     public void collectSensorsData() {
         String sensorsDataString = template.getForObject(sensorsControllerUrl + "/get_data",
                 String.class);
@@ -137,7 +194,8 @@ public class RequestSchedulerService {
     public void resumeTasks(long entityId) {
         cultureDataRepository.findById(entityId).ifPresent(cultureData -> {
             Instant currentTime = Instant.now();
-            log.info("Current time: {}. Light exposure seconds: {}. Light exposure pause seconds: {}",
+            log.info(
+                    "Current time: {}. Light exposure seconds: {}. Light exposure pause seconds: {}",
                     currentTime,
                     cultureData.getLightExposureSeconds(),
                     cultureData.getLightExposurePauseSeconds());
@@ -151,6 +209,26 @@ public class RequestSchedulerService {
                 log.info("Canceling scheduled tasks for entityId: {}", entityId);
                 future.cancel(true);
             }
+        });
+    }
+
+    public void resumeTasks() {
+        cultureDataRepository.findFirstByOrderByUpdatedAtDesc().ifPresent(cultureData -> {
+            Instant currentTime = Instant.now();
+            log.info(
+                    "Current time: {}. Light exposure seconds: {}. Light exposure pause seconds: {}",
+                    currentTime,
+                    cultureData.getLightExposureSeconds(),
+                    cultureData.getLightExposurePauseSeconds());
+            scheduleLightFirstRequest(cultureData.getId(), currentTime);
+            scheduleWaterRequest(cultureData.getId(), currentTime);
+        });
+    }
+
+    public void cancelTasks() {
+        scheduledTasks.forEach((id, future) -> {
+            log.info("Canceling scheduled tasks ");
+            future.cancel(true);
         });
     }
 
