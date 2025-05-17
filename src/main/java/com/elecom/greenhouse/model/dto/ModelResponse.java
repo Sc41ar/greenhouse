@@ -16,5 +16,6 @@ public class ModelResponse {
     private List<String> wateringSchedule;
     private String soilType;
     private int lightExposure;
+    private int lightExposurePause;
     private String fertilizationSchedule;
 }
