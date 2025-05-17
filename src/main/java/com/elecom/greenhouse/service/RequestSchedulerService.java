@@ -98,7 +98,7 @@ public class RequestSchedulerService {
         return culture.getLightExposureSeconds();
     }
 
-    @Scheduled(initialDelay = 1000)
+//    @Scheduled(initialDelay = 1000)
     public void checkLightning() {
         cultureDataRepository.findAll().forEach(cultureData -> {
             Instant currentTime = Instant.now();
@@ -110,7 +110,7 @@ public class RequestSchedulerService {
         });
     }
 
-    @Scheduled(fixedRate = 5000)
+//    @Scheduled(fixedRate = 5000)
     public void collectSensorsData() {
         String sensorsDataString = template.getForObject(sensorsControllerUrl + "/get_data",
                 String.class);
