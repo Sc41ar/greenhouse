@@ -90,7 +90,7 @@ public class RequestSchedulerService {
         return culture.getLightExposureSeconds();
     }
 
-    @Scheduled(initialDelay = 10)
+//    @Scheduled(initialDelay = 10)
     public void checkLightning() {
         cultureDataRepository.findAll().forEach(cultureData -> {
             Instant currentTime = Instant.now();
