@@ -29,6 +29,9 @@ public class CultureData {
     @Column(name = "humidity_share")
     private Double humidityShare;
 
+    @Column(name = "soil_moisture")
+    private Double soilMoisture;
+
     @Column(name = "temperature")
     private Double temperature;
 

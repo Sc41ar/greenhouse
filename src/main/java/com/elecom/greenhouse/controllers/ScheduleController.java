@@ -22,4 +22,11 @@ public class ScheduleController {
     ) {
         requestSchedulerService.cancelTasks(plantId);
     }
+
+    @PostMapping("/resume/{plantId}")
+    public void resumeSchedule(
+            @PathVariable("plantId") Long plantId
+    ) {
+        requestSchedulerService.resumeTasks(plantId);
+    }
 }

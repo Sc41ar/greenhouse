@@ -11,11 +11,10 @@ public class ModelResponse {
     private String plantName;
     private String article;
     private double humidityShare;
+    private double soilMoisture;
     private double temperature;
     private double wateringFrequency;
-    private List<String> wateringSchedule;
     private String soilType;
     private int lightExposure;
     private int lightExposurePause;
-    private String fertilizationSchedule;
 }

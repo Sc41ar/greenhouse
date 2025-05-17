@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -26,8 +27,10 @@ public class PromptService {
     private final String SYSTEM_PROMPT = """
              The user will provide question about gardening specific cultures in vertical greenhouse for commercial purposes and maximum output.\s
              Write Article in Russian about the plant and provide information about the following:
-             Such as recommended humidity percentage, temperature in degrees Celsius, watering frequency per day and watering schedule in 24 hours format, soil type, light exposure in seconds,\s
-             light exposure pause in seconds, and fertilization schedule.\s\s
+             Such as recommended humidity percentage, soil moisture,
+             temperature in degrees Celsius, watering frequency per day,\s
+             soil type, light exposure in seconds,\s
+             light exposure pause in seconds.\s\s
              And output them in JSON format.\s
                         \s
              EXAMPLE INPUT:\s
@@ -38,6 +41,7 @@ public class PromptService {
                  "plantName": "Basil",
                  "article":"Growing basil in a small home farm requires well-draining soil (pH 6.0–7.5), 6–8 hours of sunlight daily (or grow lights), consistent watering without waterlogging, regular pruning to encourage bushy growth, and warm temperatures above 70°F (21°C) to mimic its native tropical conditions.",
                  "humidityShare": 0.65,
+                 "soilMoisture": 0.75,
                  "temperature": 21,
                  "wateringFrequency": 1,
                  "lightExposure": 60000,
@@ -57,6 +61,13 @@ public class PromptService {
     }
 
     public ModelResponse sendPrompt(String userPrompt) {
+        ModelResponse modelResponse;
+        Optional<CultureData> optionalCultureData = cultureDataRepository.findByPlantName(userPrompt);
+        if (optionalCultureData.isPresent()) {
+            return ResponseMapper.mapToModelResponse(optionalCultureData.get());
+        }
+
+
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
         HttpHeaders headers = new HttpHeaders();
@@ -67,7 +78,7 @@ public class PromptService {
         request.setModel("deepseek-chat");
         request.setMessages(List.of(
                 new Message("system", SYSTEM_PROMPT),
-                new Message("user", userPrompt)
+                new Message("user", "Как вырастить " + userPrompt + "?")
         ));
         request.setStream(false);
 
@@ -77,7 +88,7 @@ public class PromptService {
                 String.class);
 
         try {
-            ModelResponse modelResponse = processResponse(response);
+            modelResponse = processResponse(response);
             saveCultureData(modelResponse);
             return modelResponse;
         } catch (Exception e) {
@@ -100,7 +111,7 @@ public class PromptService {
         data.setLightExposurePauseSeconds(modelResponse.getLightExposurePause() / 1000); //TODO
         data.setLightExposureSeconds(modelResponse.getLightExposure() / 1000); //TODO
         data.setPlantName(modelResponse.getPlantName());
-        data.setFertilizationSchedule(modelResponse.getFertilizationSchedule());
+//        data.setFertilizationSchedule(modelResponse.getFertilizationSchedule());
         data.setSoilType(modelResponse.getSoilType());
 
         cultureDataRepository.save(data);

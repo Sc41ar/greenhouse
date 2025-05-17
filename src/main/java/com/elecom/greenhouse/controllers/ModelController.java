@@ -23,7 +23,7 @@ public class ModelController {
             """
     )
     public ModelResponse getArticle(@RequestParam("culture") String culture) {
-        return promptService.sendPrompt("Как вырастить " + culture + "?");
+        return promptService.sendPrompt(culture);
     }
 
     @PostMapping("/article")

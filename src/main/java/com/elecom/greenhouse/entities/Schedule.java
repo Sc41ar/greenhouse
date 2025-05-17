@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalTime;
-
 @Entity
 @Getter
 @Setter
@@ -21,6 +19,6 @@ public class Schedule {
     private Long id;
 
     @Column(name = "time", nullable = false)
-    private LocalTime time;
+    private String time;
 
 }

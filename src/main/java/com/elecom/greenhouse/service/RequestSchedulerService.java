@@ -6,12 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
@@ -61,18 +59,7 @@ public class RequestSchedulerService {
 
     private int getPauseSecondsFromDatabase(Long entityId) {
         CultureData culture = cultureDataRepository.findById(entityId)
-                                                   .orElseGet(() -> new CultureData(entityId,
-                                                           "",
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           Set.of(),
-                                                           "",
-                                                           0,
-                                                           "",
-                                                           0,
-                                                           0,
-                                                           0));
+                                                   .orElseGet(() -> new CultureData());
         return culture.getLightExposurePauseSeconds();
     }
 
@@ -83,7 +70,8 @@ public class RequestSchedulerService {
             template.getForObject("http://192.168.31.147/light_off", String.class);
         } catch (Exception e) {
             log.error("Error sending first request", e);
-        };
+        }
+        ;
     }
 
     private void sendSecondHttpRequest(Long entityId) {
@@ -98,24 +86,24 @@ public class RequestSchedulerService {
     // Метод для получения интервала из БД
     private int getActiveSecondsFromDatabase(Long entityId) {
         CultureData culture = cultureDataRepository.findById(entityId)
-                                                   .orElseGet(() -> new CultureData(entityId,
-                                                           "",
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           Set.of(),
-                                                           "",
-                                                           0,
-                                                           "",
-                                                           0,
-                                                           0,
-                                                           0));
+                                                   .orElseGet(() -> new CultureData());
         return culture.getLightExposureSeconds();
     }
 
     @Scheduled(initialDelay = 10)
     public void checkLightning() {
         cultureDataRepository.findAll().forEach(cultureData -> {
+            Instant currentTime = Instant.now();
+            log.info("Current time: {}. Light exposure seconds: {}. Light exposure pause seconds: {}",
+                    currentTime,
+                    cultureData.getLightExposureSeconds(),
+                    cultureData.getLightExposurePauseSeconds());
+            scheduleFirstRequest(cultureData.getId(), currentTime);
+        });
+    }
+
+    public void resumeTasks(long entityId) {
+        cultureDataRepository.findById(entityId).ifPresent(cultureData -> {
             Instant currentTime = Instant.now();
             log.info("Current time: {}. Light exposure seconds: {}. Light exposure pause seconds: {}",
                     currentTime,
