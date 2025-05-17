@@ -5,12 +5,10 @@ import com.elecom.greenhouse.service.CultureService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-@RestController("/params")
+@RestController
+@RequestMapping("/params")
 @Tag(name = "Params Controller", description = "Endpoints to manage params")
 public class ParamsController {
 
@@ -20,9 +18,12 @@ public class ParamsController {
         this.cultureService = cultureService;
     }
 
-    @GetMapping
+    @GetMapping("/{plantId}")
     @Operation(summary = "Get all params")
-    public void getParams() {
+    public CultureDataChangeRequest getParams(
+            @PathVariable("plantId") long plantId
+    ) {
+        return cultureService.getCultureData(plantId);
     }
 
     @PostMapping

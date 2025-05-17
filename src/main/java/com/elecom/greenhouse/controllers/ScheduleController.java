@@ -3,9 +3,11 @@ package com.elecom.greenhouse.controllers;
 import com.elecom.greenhouse.service.RequestSchedulerService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("/schedule")
+@RestController
+@RequestMapping(value = "/schedule")
 public class ScheduleController {
 
     private final RequestSchedulerService requestSchedulerService;
@@ -17,7 +19,7 @@ public class ScheduleController {
     @PostMapping("/cancel/{plantId}")
     public void cancelSchedule(
             @PathVariable("plantId") Long plantId
-    ){
+    ) {
         requestSchedulerService.cancelTasks(plantId);
     }
 }

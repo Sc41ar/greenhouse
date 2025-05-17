@@ -24,4 +24,13 @@ public class CultureService {
         cultureDataRepository.save(cultureData);
         return cultureDataChangeRequest;
     }
+
+    public CultureDataChangeRequest getCultureData(long plantId) {
+        CultureData cultureData = cultureDataRepository.getReferenceById(plantId);
+        CultureDataChangeRequest cultureDataChangeRequest = new CultureDataChangeRequest();
+        cultureDataChangeRequest.setPlantId(plantId);
+        cultureDataChangeRequest.setLightExposure(cultureData.getLightExposureSeconds());
+        cultureDataChangeRequest.setLightExposurePause(cultureData.getLightExposurePauseSeconds());
+        return cultureDataChangeRequest;
+    }
 }

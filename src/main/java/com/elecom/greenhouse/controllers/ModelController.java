@@ -6,12 +6,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-@RestController("/model")
+@RestController
+@RequestMapping("/model")
 @Tag(name = "Model Controller")
 @RequiredArgsConstructor
 public class ModelController {
@@ -30,8 +28,8 @@ public class ModelController {
 
     @PostMapping("/article")
     @Operation(description = """
-            Парсинг ответа от модели. Принимает на вход строку с ответом от модели возвращает объект с целевой информацией о растении.\s
-           \s""")
+             Парсинг ответа от модели. Принимает на вход строку с ответом от модели возвращает объект с целевой информацией о растении.\s
+            \s""")
     public ResponseEntity<ModelResponse> getArticleFromString(
 //            @RequestParam("culture") String culture
     ) throws Exception {

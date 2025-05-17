@@ -8,8 +8,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,7 +31,7 @@ public class RequestSchedulerService {
     }
 
     // Метод для планирования первого запроса
-    public void scheduleFirstRequest(Long entityId, LocalDateTime scheduleTime) {
+    public void scheduleFirstRequest(Long entityId, Instant scheduleTime) {
         log.info("Scheduling first request for entityId: {}", entityId);
         Runnable task = () -> {
             sendHttpRequest(entityId); // Отправка первого запроса
@@ -40,7 +39,7 @@ public class RequestSchedulerService {
         };
 
         ScheduledFuture<?> future = scheduler.schedule(task,
-                scheduleTime.toInstant(ZoneOffset.UTC));
+                scheduleTime);
         scheduledTasks.put(entityId, future);
     }
 
@@ -52,11 +51,10 @@ public class RequestSchedulerService {
         Runnable task = () -> {
             sendSecondHttpRequest(entityId);
             scheduleFirstRequest(entityId,
-                    LocalDateTime.now().plusSeconds(pauseSeconds));
+                    Instant.now().plusSeconds(pauseSeconds));
         };
         ScheduledFuture<?> future = scheduler.schedule(task,
-                LocalDateTime.now().plusSeconds(workSeconds)
-                             .toInstant(ZoneOffset.UTC));
+                Instant.now().plusSeconds(workSeconds));
         scheduledTasks.put(entityId, future);
     }
 
@@ -77,11 +75,11 @@ public class RequestSchedulerService {
 
     // Методы для отправки HTTP-запросов
     private void sendHttpRequest(Long entityId) {
-        log.error("first request");
+        log.info("first request executed");
     }
 
     private void sendSecondHttpRequest(Long entityId) {
-        log.error("second request");
+        log.info("second request executed");
     }
 
     // Метод для получения интервала из БД
@@ -100,10 +98,10 @@ public class RequestSchedulerService {
         return culture.getLightExposureSeconds();
     }
 
-    @Scheduled(cron = "20 * * * * *")
+    @Scheduled(initialDelay = 10)
     public void checkLightning() {
         cultureDataRepository.findAll().forEach(cultureData -> {
-            LocalDateTime currentTime = LocalDateTime.now();
+            Instant currentTime = Instant.now();
             log.info("Current time: {}. Light exposure seconds: {}. Light exposure pause seconds: {}",
                     currentTime,
                     cultureData.getLightExposureSeconds(),
@@ -115,7 +113,7 @@ public class RequestSchedulerService {
     public void cancelTasks(long entityId) {
         scheduledTasks.forEach((id, future) -> {
             if (id.equals(entityId)) {
-                log.error("Canceling scheduled tasks for entityId: {}", entityId);
+                log.info("Canceling scheduled tasks for entityId: {}", entityId);
                 future.cancel(true);
             }
         });
