@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
@@ -77,11 +78,21 @@ public class RequestSchedulerService {
 
     // Методы для отправки HTTP-запросов
     private void sendHttpRequest(Long entityId) {
-        log.info("first request executed");
+        log.info("first request executed entityId: {}", entityId);
+        try {
+            template.getForObject("http://192.168.31.147/light_off", String.class);
+        } catch (Exception e) {
+            log.error("Error sending first request", e);
+        };
     }
 
     private void sendSecondHttpRequest(Long entityId) {
-        log.info("second request executed");
+        log.info("second request executed {}", entityId);
+        try {
+            template.getForObject("http://192.168.31.147/light_off", String.class);
+        } catch (Exception e) {
+            log.error("Error sending second request", e);
+        }
     }
 
     // Метод для получения интервала из БД

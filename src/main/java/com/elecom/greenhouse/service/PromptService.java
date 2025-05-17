@@ -9,7 +9,6 @@ import com.elecom.greenhouse.repositories.CultureDataRepository;
 import com.elecom.greenhouse.util.ResponseMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -78,7 +77,9 @@ public class PromptService {
                 String.class);
 
         try {
-            return processResponse(response);
+            ModelResponse modelResponse = processResponse(response);
+            saveCultureData(modelResponse);
+            return modelResponse;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
