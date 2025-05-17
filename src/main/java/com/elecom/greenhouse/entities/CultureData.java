@@ -46,13 +46,13 @@ public class CultureData {
     private String soilType;
 
     @Column(name = "light_exposure_seconds")
-    private Integer lightExposureSeconds;
+    private Integer lightExposureSeconds = 0;
 
     @Column(name = "fertilization_schedule")
     private String fertilizationSchedule;
 
     @Column(name = "light_exposure_pause_seconds")
-    private Integer lightExposurePauseSeconds;
+    private Integer lightExposurePauseSeconds = 0;
 
     @Column(name = "watering_seconds")
     private Integer wateringSeconds;
