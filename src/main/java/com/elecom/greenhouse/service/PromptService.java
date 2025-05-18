@@ -105,6 +105,10 @@ public class PromptService {
         var a = mapper.readValue(prompt, ChatCompletionResponse.class);
         ModelResponse modelResponse = ResponseMapper.mapToModelResponse(a);
 
+        modelResponse.setLightExposure(modelResponse.getLightExposure() / 1000);
+        modelResponse.setLightExposurePause(modelResponse.getLightExposurePause() / 1000);
+        modelResponse.setWateringSeconds(modelResponse.getWateringSeconds() / 1000);
+        modelResponse.setWateringPause(modelResponse.getWateringPause() / 1000);
         return modelResponse;
     }
 
