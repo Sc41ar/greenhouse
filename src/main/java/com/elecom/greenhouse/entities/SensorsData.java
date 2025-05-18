@@ -17,26 +17,26 @@ import java.time.Instant;
 public class SensorsData {
 
     @Column(name = "soil_moisture")
-    private Double soilMoisture = 0.0;
+    private Double soilMoisture = 20.0;
 
     @Column(name = "water_temperature")
-    private Double waterTemperature = 0.0;
+    private Double waterTemperature = 60.0;
 
     @UpdateTimestamp
     @Column(name = "collected_at")
     private Instant collectedAt = Instant.now();
 
     @Column(name = "temperature")
-    private Double temperature = 0.0;
+    private Double temperature = 80.0;
 
     @Column(name = "humidity")
-    private Double humidity = 0.0;
+    private Double humidity = 08.0;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", nullable = false)
-    private Long id = 0L;
+    private Long id = 10L;
 
     @Column(name = "co2")
-    private Double co2 = 0.0;
+    private Double co2 = 2.2;
 }

@@ -15,7 +15,8 @@ public class SensorsService {
     }
 
     public SensorsData getLastSensorsData() {
-        return sensorsDataRepository.findFirstByOrderByCollectedAtDesc();
+        return sensorsDataRepository.findFirstByOrderByCollectedAtDesc()
+                                    .orElseGet(() -> new SensorsData());
     }
 
 }

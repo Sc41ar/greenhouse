@@ -153,7 +153,7 @@ public class RequestSchedulerService {
         return culture.getWateringPauseSeconds();
     }
 
-    @Scheduled(initialDelay = 1000)
+//    @Scheduled(initialDelay = 1000)
     public void checkLightning() {
         cultureDataRepository.findFirstByOrderByUpdatedAtDesc().ifPresent(cultureData -> {
             Instant currentTime = Instant.now();
